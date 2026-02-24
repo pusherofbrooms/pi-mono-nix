@@ -86,9 +86,10 @@ buildNpmPackage {
     runHook postInstall
   '';
 
-  # This workspace contains many prebuilt/native Node artifacts; on Darwin,
-  # fixup's ELF patching is not applicable and can hang/error via patchelf hooks.
-  dontFixup = stdenv.isDarwin;
+  # This workspace contains many prebuilt/native Node artifacts;
+  # fixup's ELF patching can fail on intermediate build artifacts (like .o files)
+  # in node_modules, so we disable it.
+  dontFixup = true;
 
   meta = {
     description = "Built workspace artifacts for the pi monorepo";
