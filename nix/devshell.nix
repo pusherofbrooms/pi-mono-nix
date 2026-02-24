@@ -1,0 +1,42 @@
+{
+  lib,
+  stdenv,
+  mkShell,
+  nodejs_22,
+  git,
+  ripgrep,
+  fd,
+  bun,
+  pkg-config,
+  python3,
+  gcc,
+  gnumake,
+  cairo,
+  pango,
+  libjpeg,
+  giflib,
+  librsvg,
+  pixman,
+}:
+mkShell {
+  packages =
+    [
+      nodejs_22
+      git
+      ripgrep
+      fd
+      bun
+      pkg-config
+      python3
+      gcc
+      gnumake
+    ]
+    ++ lib.optionals stdenv.isLinux [
+      cairo
+      pango
+      libjpeg
+      giflib
+      librsvg
+      pixman
+    ];
+}
