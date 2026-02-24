@@ -32,6 +32,40 @@ nix run .#pi-pods -- --help
 nix run .#mom -- --help
 ```
 
+## Use This Flake From Another Flake
+
+Add `pi-mono-nix` as an input, then reference its packages/apps using `flake-utils` system scaffolding:
+
+```nix
+{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    flake-utils.url = "github:numtide/flake-utils";
+    pi-mono-nix.url = "github:pusherofbrooms/pi-mono-nix";
+    pi-mono-nix.inputs.nixpkgs.follows = "nixpkgs";
+  };
+
+  outputs = { self, nixpkgs, flake-utils, pi-mono-nix, ... }:
+    flake-utils.lib.eachDefaultSystem (system:
+      let
+        pkgs = import nixpkgs { inherit system; };
+      in {
+        packages.default = pi-mono-nix.packages.${system}.pi;
+
+        apps.pi = pi-mono-nix.apps.${system}.pi;
+        apps.default = self.apps.${system}.pi;
+
+        devShells.default = pkgs.mkShell {
+          packages = [
+            pi-mono-nix.packages.${system}.pi
+            pi-mono-nix.packages.${system}.pi-ai
+          ];
+        };
+      };
+    );
+}
+```
+
 ## Exposed Outputs
 
 `packages`:
