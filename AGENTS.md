@@ -29,6 +29,13 @@ If sandbox restrictions prevent daemon/cache access, state that clearly and prov
 - Prefer small, reviewable changes.
 - Update `README.md` when behavior, outputs, or required commands change.
 
+## Locking Policy
+
+- Treat `flake.lock` and `npmDepsHash` as separate locks.
+- Updating the `pi-mono` input in `flake.lock` does not always require changing `npmDepsHash`.
+- Only update `npmDepsHash` in `nix/workspace.nix` when `nix build .#pi` reports an npm deps hash mismatch (usually after dependency/lockfile changes).
+- If both change, commit them together.
+
 ## Editing Hygiene
 
 - Use `rg`/`rg --files` for search.
