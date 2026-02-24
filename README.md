@@ -13,11 +13,29 @@ This repo provides:
 - Nix with flakes enabled
 - Network access for initial input/dependency fetches
 
-## Quick Start
+## Quick Start (Remote)
 
 ```bash
-# inspect outputs
-nix flake show --no-write-lock-file
+# run CLIs directly from GitHub
+nix run github:pusherofbrooms/pi-mono-nix#pi -- --help
+nix run github:pusherofbrooms/pi-mono-nix#pi-ai -- --help
+nix run github:pusherofbrooms/pi-mono-nix#pi-pods -- --help
+nix run github:pusherofbrooms/pi-mono-nix#mom -- --help
+```
+
+You can also inspect exported outputs without cloning:
+
+```bash
+nix flake show github:pusherofbrooms/pi-mono-nix --no-write-lock-file
+```
+
+## Quick Start (Local Dev)
+
+Clone this repo when you want to contribute or modify flake behavior:
+
+```bash
+git clone https://github.com/pusherofbrooms/pi-mono-nix.git
+cd pi-mono-nix
 
 # enter the dev environment
 nix develop
