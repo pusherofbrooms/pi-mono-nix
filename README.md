@@ -2,7 +2,7 @@
 
 Nix flake packaging for [`badlogic/pi-mono`](https://github.com/badlogic/pi-mono), which currently does not ship its own flake.
 
-This repo provides:
+This repository is an **external packaging flake** for upstream `pi-mono`. It provides:
 - a reproducible workspace build for the upstream monorepo
 - runnable CLI apps (`pi`, `pi-ai`, `pi-pods`, `mom`)
 - package outputs for CLI and library artifacts
@@ -12,6 +12,14 @@ This repo provides:
 
 - Nix with flakes enabled
 - Network access for initial input/dependency fetches
+
+## Supported Systems
+
+Built with `flake-utils.lib.eachDefaultSystem`:
+- `aarch64-linux`
+- `x86_64-linux`
+- `aarch64-darwin`
+- `x86_64-darwin`
 
 ## Quick Start (Remote)
 
@@ -23,27 +31,11 @@ nix run github:pusherofbrooms/pi-mono-nix#pi-pods -- --help
 nix run github:pusherofbrooms/pi-mono-nix#mom -- --help
 ```
 
-You can also inspect exported outputs without cloning:
+Inspect exported outputs without cloning:
 
 ```bash
 nix flake show github:pusherofbrooms/pi-mono-nix --no-write-lock-file
 ```
-
-## pi Extensions
-
-If you want to use extensions, and you don't want to package them up for nix, you'll need npm. The following command pulls in npm and pi.
-
-```bash
-nix shell nixpkgs#nodejs github:pusherofbrooms/pi-mono-nix#pi
-```
-
-You'll also need to set a writable `npm install` landing place. I created an .npmrc with the following:
-
-```
-prefix=~/.npm-global
-```
-
-This is likely to break with anything that requires native builds or in the slightest gust of wind.
 
 ## Quick Start (Local Dev)
 
@@ -66,16 +58,34 @@ nix run .#pi-pods -- --help
 nix run .#mom -- --help
 ```
 
+## Validation Commands
+
+Recommended quick validation flow after changes:
+
+```bash
+nix flake show --no-write-lock-file
+nix build .#pi
+nix run .#pi -- --help
+```
+
+Optional broader check:
+
+```bash
+nix flake check
+```
+
 ## Use This Flake From Another Flake
 
-Add `pi-mono-nix` as an input, then reference its packages/apps using `flake-utils` system scaffolding:
+Add `pi-mono-nix` as an input, then reference its packages/apps for each target system.
 
 ```nix
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+
     pi-mono-nix.url = "github:pusherofbrooms/pi-mono-nix";
+    # Keep nixpkgs aligned across flakes when possible.
     pi-mono-nix.inputs.nixpkgs.follows = "nixpkgs";
   };
 
@@ -92,35 +102,68 @@ Add `pi-mono-nix` as an input, then reference its packages/apps using `flake-uti
         devShells.default = pkgs.mkShell {
           packages = [
             pi-mono-nix.packages.${system}.pi
-            pi-mono-nix.packages.${system}.pi-ai
+            pi-mono-nix.packages.${system}."pi-ai"
           ];
         };
-      };
+      }
     );
 }
 ```
 
 ## Exposed Outputs
 
-`packages`:
+### `packages`
 - `default` (`pi`)
-- `pi`, `pi-ai`, `pi-pods`, `pi-mom`
+- `pi`
+- `pi-ai`
+- `pi-pods`
+- `pi-mom` (package name is `pi-mom`, binary is `mom`)
 - `workspace`
-- `pi-ai-lib`, `pi-agent-core`, `pi-coding-agent`, `pi-tui`, `pi-web-ui`, `pi-mom-lib`, `pi-pods-lib`
+- `pi-ai-lib`
+- `pi-agent-core`
+- `pi-coding-agent`
+- `pi-tui`
+- `pi-web-ui`
+- `pi-mom-lib`
+- `pi-pods-lib`
 
-`apps`:
+### `apps`
 - `default` (`pi`)
-- `pi`, `pi-ai`, `pi-pods`, `mom`
+- `pi`
+- `pi-ai`
+- `pi-pods`
+- `mom`
 
-`devShells`:
+### `devShells`
 - `default`
+
+> Naming note: `mom` is exposed as an **app** (`nix run .#mom`) and `pi-mom` is exposed as a **package** (`nix build .#pi-mom`).
+
+## pi Extensions (non-Nix-packaged)
+
+If you want to install extensions at runtime without packaging them in Nix, include Node/npm alongside `pi`:
+
+```bash
+nix shell nixpkgs#nodejs github:pusherofbrooms/pi-mono-nix#pi
+```
+
+Set a writable npm prefix (example `~/.npmrc`):
+
+```ini
+prefix=~/.npm-global
+```
+
+Caveats:
+- this is most reliable for JS-only extensions
+- extensions with native modules may require additional toolchains/libs
+- behavior is less reproducible than packaging extensions through Nix
 
 ## Design Notes
 
 - Source input is pinned to `github:badlogic/pi-mono` as a non-flake input.
 - The workspace is built once via `buildNpmPackage`; package outputs are symlinked from that build.
-- Nix build behavior patches the `packages/ai` workspace build script in-derivation to avoid live model metadata fetches, keeping builds deterministic.
-- No fixup stage as there are lots of intermediate objects and no value in fixup for the pi cli.
+- Nix build behavior updates the `packages/ai` workspace build script in-derivation to avoid live model metadata fetches, keeping builds deterministic.
+- Fixup is disabled for this workspace build (`dontFixup = true`) due to large native/prebuilt dependency trees in `node_modules`.
 
 ## Updating Inputs
 
@@ -128,11 +171,19 @@ Add `pi-mono-nix` as an input, then reference its packages/apps using `flake-uti
 nix flake update
 ```
 
-Then rebuild to refresh lock-pinned inputs:
+Then rebuild to validate lock-pinned inputs:
 
 ```bash
 nix build .#pi
 ```
+
+## Locking Policy
+
+Treat `flake.lock` and `npmDepsHash` as separate locks:
+
+- Updating `flake.lock` does **not** always require changing `npmDepsHash`.
+- Only update `npmDepsHash` in `nix/workspace.nix` when `nix build .#pi` reports an npm dependency hash mismatch.
+- If both change, commit them together.
 
 ## Troubleshooting
 
