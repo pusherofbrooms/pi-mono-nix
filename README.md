@@ -29,6 +29,22 @@ You can also inspect exported outputs without cloning:
 nix flake show github:pusherofbrooms/pi-mono-nix --no-write-lock-file
 ```
 
+## pi Extensions
+
+If you want to use extensions, and you don't want to package them up for nix, you'll need npm. The following command pulls in npm and pi.
+
+```bash
+nix shell nixpkgs#nodejs github:pusherofbrooms/pi-mono-nix#pi
+```
+
+You'll also need to set a writable `npm install` landing place. I created an .npmrc with the following:
+
+```
+prefix=~/.npm-global
+```
+
+This is likely to break with anything that requires native builds or in the slightest gust of wind.
+
 ## Quick Start (Local Dev)
 
 Clone this repo when you want to contribute or modify flake behavior:
@@ -104,7 +120,7 @@ Add `pi-mono-nix` as an input, then reference its packages/apps using `flake-uti
 - Source input is pinned to `github:badlogic/pi-mono` as a non-flake input.
 - The workspace is built once via `buildNpmPackage`; package outputs are symlinked from that build.
 - Nix build behavior patches the `packages/ai` workspace build script in-derivation to avoid live model metadata fetches, keeping builds deterministic.
-- On Darwin, `dontFixup = stdenv.isDarwin` is set to avoid `patchelf` fixup issues on Node/native artifacts.
+- No fixup stage as there are lots of intermediate objects and no value in fixup for the pi cli.
 
 ## Updating Inputs
 
