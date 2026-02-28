@@ -25,6 +25,20 @@
             inherit workspace;
             inherit (pkgs) runCommand;
           };
+          mkContainerImage = imageName: drv: bin: pkgs.dockerTools.buildLayeredImage {
+            name = imageName;
+            tag = "latest";
+            contents = [ drv ];
+            config = {
+              Entrypoint = [ "${drv}/bin/${bin}" ];
+            };
+          };
+          containerSet = pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
+            "pi-container" = mkContainerImage "pi" packageSet.pi "pi";
+            "pi-ai-container" = mkContainerImage "pi-ai" packageSet."pi-ai" "pi-ai";
+            "pi-pods-container" = mkContainerImage "pi-pods" packageSet."pi-pods" "pi-pods";
+            "mom-container" = mkContainerImage "mom" packageSet."pi-mom" "mom";
+          };
           devShell = import ./nix/devshell.nix {
             inherit (pkgs)
               lib
@@ -56,7 +70,7 @@
             };
         in
         {
-          packages = packageSet // { default = packageSet.pi; };
+          packages = packageSet // containerSet // { default = packageSet.pi; };
 
           apps = {
             default = mkApp packageSet.pi "pi coding agent CLI";

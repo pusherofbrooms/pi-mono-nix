@@ -58,6 +58,31 @@ nix run .#pi-pods -- --help
 nix run .#mom -- --help
 ```
 
+## Container Images (Linux)
+
+Build OCI/Docker image tarballs for CLI targets:
+
+```bash
+nix build .#pi-container
+nix build .#pi-ai-container
+nix build .#pi-pods-container
+nix build .#mom-container
+```
+
+Load one into Docker/Podman, then run:
+
+```bash
+docker load < result
+
+# interactive mode
+docker run --rm -it pi:latest
+
+# help
+docker run --rm pi:latest --help
+```
+
+Other targets work the same way (image tags: `pi-ai:latest`, `pi-pods:latest`, `mom:latest`).
+
 ## Validation Commands
 
 Recommended quick validation flow after changes:
@@ -126,6 +151,10 @@ Add `pi-mono-nix` as an input, then reference its packages/apps for each target 
 - `pi-web-ui`
 - `pi-mom-lib`
 - `pi-pods-lib`
+- `pi-container` (Linux only; OCI/Docker image tarball)
+- `pi-ai-container` (Linux only; OCI/Docker image tarball)
+- `pi-pods-container` (Linux only; OCI/Docker image tarball)
+- `mom-container` (Linux only; OCI/Docker image tarball)
 
 ### `apps`
 - `default` (`pi`)
