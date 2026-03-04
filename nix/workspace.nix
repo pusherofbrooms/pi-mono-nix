@@ -71,6 +71,12 @@ buildNpmPackage {
       cp -R packages/$pkg/dist "$root/packages/$pkg/"
     done
 
+    # Runtime entrypoints exported from @mariozechner/pi-ai.
+    cp packages/ai/oauth.js "$root/packages/ai/"
+    cp packages/ai/oauth.d.ts "$root/packages/ai/"
+    cp packages/ai/bedrock-provider.js "$root/packages/ai/"
+    cp packages/ai/bedrock-provider.d.ts "$root/packages/ai/"
+
     # Runtime docs/assets used by coding-agent package commands.
     cp -R packages/coding-agent/docs "$root/packages/coding-agent/"
     cp -R packages/coding-agent/examples "$root/packages/coding-agent/"
