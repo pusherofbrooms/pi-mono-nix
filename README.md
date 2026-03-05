@@ -196,13 +196,32 @@ Caveats:
 
 ## Updating Inputs
 
+Automated updater (recommended):
+
 ```bash
-nix flake update
+scripts/update-release.sh
 ```
 
-Then rebuild to validate lock-pinned inputs:
+This script:
+- updates `flake.nix` to the latest `badlogic/pi-mono` release tag
+- runs `nix flake lock --update-input pi-mono`
+- builds `.#pi`
+- if needed, updates `npmDepsHash` in `nix/workspace.nix` from the reported hash mismatch and rebuilds
+- runs `nix run .#pi -- --help`
+- creates a commit (`chore: update pi-mono to <tag>`)
+
+Useful flags:
 
 ```bash
+scripts/update-release.sh --tag v0.56.0
+scripts/update-release.sh --no-commit
+scripts/update-release.sh --allow-dirty
+```
+
+Manual fallback:
+
+```bash
+nix flake lock --update-input pi-mono
 nix build .#pi
 ```
 
