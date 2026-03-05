@@ -8,8 +8,8 @@ Usage: scripts/update-release.sh [--tag vX.Y.Z] [--no-commit] [--allow-dirty]
 Updates this flake to the latest badlogic/pi-mono release (or a provided tag):
 1) updates pi-mono ref in flake.nix
 2) updates flake.lock for input pi-mono
-3) builds .#pi
-4) if npmDepsHash mismatch is reported, updates nix/workspace.nix and rebuilds
+3) sets npmDepsHash = lib.fakeHash and builds .#pi to capture the real hash
+4) writes the real npmDepsHash to nix/workspace.nix and rebuilds
 5) runs .#pi -- --help
 6) creates a commit (unless --no-commit)
 
@@ -31,6 +31,37 @@ require_cmd() {
 extract_hash_from_log() {
   local log_file="$1"
   grep -Eo 'got:[[:space:]]*sha256-[A-Za-z0-9+/=]+' "$log_file" | head -n1 | sed -E 's/^got:[[:space:]]*//'
+}
+
+rewrite_npm_deps_hash() {
+  local mode="$1" # fake | real
+  local hash="${2:-}"
+  local tmp
+
+  tmp="$(mktemp "${TMPDIR:-/tmp}/pi-mono-nix-workspace.XXXXXX.nix")"
+
+  awk -v mode="$mode" -v hash="$hash" '
+    BEGIN { replaced=0 }
+    {
+      if ($0 ~ /^[[:space:]]*npmDepsHash[[:space:]]*=/) {
+        if (!replaced) {
+          if (mode == "fake") {
+            print "  npmDepsHash = lib.fakeHash;"
+          } else {
+            print "  npmDepsHash = \"" hash "\";"
+          }
+          replaced=1
+        }
+        next
+      }
+      print
+    }
+    END {
+      if (!replaced) exit 1
+    }
+  ' nix/workspace.nix > "$tmp"
+
+  mv "$tmp" nix/workspace.nix
 }
 
 TAG=""
@@ -100,7 +131,7 @@ fi
 
 echo "==> Updating flake.nix pi-mono ref to $TAG"
 OLD_REF_LINE="$(grep -E 'github:badlogic/pi-mono\?ref=' flake.nix || true)"
-TMP_FLAKE="$(mktemp -t pi-mono-nix-flake.XXXXXX.nix)"
+TMP_FLAKE="$(mktemp "${TMPDIR:-/tmp}/pi-mono-nix-flake.XXXXXX.nix")"
 awk -v tag="$TAG" '{
   gsub(/github:badlogic\/pi-mono\?ref=[^"]+/, "github:badlogic/pi-mono?ref=" tag)
   print
@@ -114,38 +145,28 @@ fi
 echo "==> Updating lock for input pi-mono"
 nix flake lock --update-input pi-mono
 
-echo "==> Building .#pi"
-BUILD_LOG="$(mktemp -t pi-mono-nix-update-build.XXXXXX.log)"
-if ! nix build .#pi >"$BUILD_LOG" 2>&1; then
-  NEW_HASH="$(extract_hash_from_log "$BUILD_LOG" || true)"
-  if [[ -z "$NEW_HASH" ]]; then
-    echo "error: build failed and npmDepsHash mismatch was not detected" >&2
-    echo "--- build log ---" >&2
-    sed -n '1,200p' "$BUILD_LOG" >&2
-    exit 1
-  fi
+echo "==> Forcing npmDepsHash refresh via lib.fakeHash"
+rewrite_npm_deps_hash fake
 
-  echo "==> Updating nix/workspace.nix npmDepsHash to $NEW_HASH"
-  TMP_WORKSPACE="$(mktemp -t pi-mono-nix-workspace.XXXXXX.nix)"
-  awk -v hash="$NEW_HASH" '
-    BEGIN { replaced=0 }
-    {
-      if (!replaced && $0 ~ /npmDepsHash[[:space:]]*=/) {
-        print "  npmDepsHash = \"" hash "\";"
-        replaced=1
-      } else {
-        print
-      }
-    }
-    END {
-      if (!replaced) exit 1
-    }
-  ' nix/workspace.nix > "$TMP_WORKSPACE"
-  mv "$TMP_WORKSPACE" nix/workspace.nix
-
-  echo "==> Rebuilding .#pi"
-  nix build .#pi
+BUILD_LOG="$(mktemp "${TMPDIR:-/tmp}/pi-mono-nix-update-build.XXXXXX.log")"
+if nix build .#pi >"$BUILD_LOG" 2>&1; then
+  echo "error: expected hash mismatch with lib.fakeHash, but build succeeded" >&2
+  exit 1
 fi
+
+NEW_HASH="$(extract_hash_from_log "$BUILD_LOG" || true)"
+if [[ -z "$NEW_HASH" ]]; then
+  echo "error: forced hash refresh failed; could not parse reported hash" >&2
+  echo "--- build log ---" >&2
+  sed -n '1,200p' "$BUILD_LOG" >&2
+  exit 1
+fi
+
+echo "==> Updating nix/workspace.nix npmDepsHash to $NEW_HASH"
+rewrite_npm_deps_hash real "$NEW_HASH"
+
+echo "==> Rebuilding .#pi"
+nix build .#pi
 
 echo "==> Validating CLI"
 nix run .#pi -- --help >/dev/null

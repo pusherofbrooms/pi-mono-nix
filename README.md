@@ -205,8 +205,7 @@ scripts/update-release.sh
 This script:
 - updates `flake.nix` to the latest `badlogic/pi-mono` release tag
 - runs `nix flake lock --update-input pi-mono`
-- builds `.#pi`
-- if needed, updates `npmDepsHash` in `nix/workspace.nix` from the reported hash mismatch and rebuilds
+- forces `npmDepsHash = lib.fakeHash`, captures the reported real hash, writes it back, and rebuilds `.#pi`
 - runs `nix run .#pi -- --help`
 - creates a commit (`chore: update pi-mono to <tag>`)
 
