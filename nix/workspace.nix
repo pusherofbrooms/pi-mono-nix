@@ -29,7 +29,7 @@ buildNpmPackage {
   # Set with fake hash first; nix will print the correct hash on first build.
   # Replace this with that value before upstreaming.
   # npmDepsHash = lib.fakeHash;
-  npmDepsHash = "sha256-ow7wNZov4hovcWGgLRF42x1Ho8hXz6toWWLOpTkzI6w=";
+  npmDepsHash = "sha256-f+z+5P/FkRLB7GfH+/aJI9W6PEwDjcUtqXukIQENaI0=";
 
   # Build all workspace packages in repo-defined order.
   npmBuildScript = "build";
@@ -72,8 +72,14 @@ buildNpmPackage {
     done
 
     # Runtime entrypoints exported from @mariozechner/pi-ai.
-    cp packages/ai/oauth.js "$root/packages/ai/"
-    cp packages/ai/oauth.d.ts "$root/packages/ai/"
+    # Upstream moved oauth artifacts into dist/; keep compatibility with both layouts.
+    if [ -f packages/ai/oauth.js ]; then
+      cp packages/ai/oauth.js "$root/packages/ai/"
+      cp packages/ai/oauth.d.ts "$root/packages/ai/"
+    else
+      cp packages/ai/dist/oauth.js "$root/packages/ai/dist/"
+      cp packages/ai/dist/oauth.d.ts "$root/packages/ai/dist/"
+    fi
     cp packages/ai/bedrock-provider.js "$root/packages/ai/"
     cp packages/ai/bedrock-provider.d.ts "$root/packages/ai/"
 
