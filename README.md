@@ -81,6 +81,43 @@ docker run --rm -it pi:latest
 docker run --rm pi:latest --help
 ```
 
+Mount your current directory as a workspace (conventional in-container path: `/workspace`):
+
+```bash
+docker run --rm -it \
+  -v "$PWD:/workspace" \
+  -w /workspace \
+  pi:latest
+```
+
+Persist pi auth/session state (including OAuth tokens) across runs, and map file writes to your host user:
+
+```bash
+docker run --rm -it \
+  -u "$(id -u):$(id -g)" \
+  -v "$PWD:/workspace" \
+  -w /workspace \
+  -v "$HOME/.pi:/tmp/pi-home/.pi" \
+  -e HOME=/tmp/pi-home \
+  -e PI_CODING_AGENT_DIR=/tmp/pi-home/.pi/agent \
+  -e TMPDIR=/tmp/pi-home/.pi/tmp \
+  pi:latest
+```
+
+Helper script (same defaults as above):
+
+```bash
+scripts/run-pi-container.sh
+scripts/run-pi-container.sh --workspace ~/workspace
+scripts/run-pi-container.sh --runtime podman -- --help
+```
+
+Open an interactive shell in the image:
+
+```bash
+docker run --rm -it --entrypoint bash pi:latest
+```
+
 Other targets work the same way (image tags: `pi-ai:latest`, `pi-pods:latest`, `mom:latest`).
 
 ## Validation Commands

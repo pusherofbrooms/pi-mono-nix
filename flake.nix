@@ -25,12 +25,33 @@
             inherit workspace;
             inherit (pkgs) runCommand;
           };
+          containerRuntimeTools = [
+            pkgs.bash
+            pkgs.coreutils
+            pkgs.findutils
+            pkgs.gnugrep
+            pkgs.gnused
+            pkgs.gawk
+            pkgs.fd
+            pkgs.ripgrep
+          ];
+          containerPath = pkgs.lib.makeBinPath containerRuntimeTools;
           mkContainerImage = imageName: drv: bin: pkgs.dockerTools.buildLayeredImage {
             name = imageName;
             tag = "latest";
-            contents = [ drv ];
+            contents = [
+              drv
+              pkgs.cacert
+            ] ++ containerRuntimeTools;
             config = {
               Entrypoint = [ "${drv}/bin/${bin}" ];
+              Env = [
+                "PATH=${containerPath}"
+                "SHELL=${pkgs.bash}/bin/bash"
+                "SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
+                "NIX_SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
+                "NODE_EXTRA_CA_CERTS=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
+              ];
             };
           };
           containerSet = pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
