@@ -33,12 +33,19 @@ extract_hash_from_log() {
   grep -Eo 'got:[[:space:]]*sha256-[A-Za-z0-9+/=]+' "$log_file" | head -n1 | sed -E 's/^got:[[:space:]]*//'
 }
 
+mktemp_in_tmpdir() {
+  local prefix="$1"
+  local tmp_base="${TMPDIR:-/tmp}"
+  tmp_base="${tmp_base%/}"
+  mktemp "${tmp_base}/${prefix}.XXXXXX"
+}
+
 rewrite_npm_deps_hash() {
   local mode="$1" # fake | real
   local hash="${2:-}"
   local tmp
 
-  tmp="$(mktemp "${TMPDIR:-/tmp}/pi-mono-nix-workspace.XXXXXX.nix")"
+  tmp="$(mktemp_in_tmpdir "pi-mono-nix-workspace")"
 
   awk -v mode="$mode" -v hash="$hash" '
     BEGIN { replaced=0 }
@@ -131,7 +138,7 @@ fi
 
 echo "==> Updating flake.nix pi-mono ref to $TAG"
 OLD_REF_LINE="$(grep -E 'github:badlogic/pi-mono\?ref=' flake.nix || true)"
-TMP_FLAKE="$(mktemp "${TMPDIR:-/tmp}/pi-mono-nix-flake.XXXXXX.nix")"
+TMP_FLAKE="$(mktemp_in_tmpdir "pi-mono-nix-flake")"
 awk -v tag="$TAG" '{
   gsub(/github:badlogic\/pi-mono\?ref=[^"]+/, "github:badlogic/pi-mono?ref=" tag)
   print
@@ -143,12 +150,12 @@ if [[ "$OLD_REF_LINE" == "$NEW_REF_LINE" ]]; then
 fi
 
 echo "==> Updating lock for input pi-mono"
-nix flake lock --update-input pi-mono
+nix flake update pi-mono
 
 echo "==> Forcing npmDepsHash refresh via lib.fakeHash"
 rewrite_npm_deps_hash fake
 
-BUILD_LOG="$(mktemp "${TMPDIR:-/tmp}/pi-mono-nix-update-build.XXXXXX.log")"
+BUILD_LOG="$(mktemp_in_tmpdir "pi-mono-nix-update-build")"
 if nix build .#pi >"$BUILD_LOG" 2>&1; then
   echo "error: expected hash mismatch with lib.fakeHash, but build succeeded" >&2
   exit 1
