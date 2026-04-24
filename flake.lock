@@ -37,16 +37,16 @@
     "pi-mono": {
       "flake": false,
       "locked": {
-        "lastModified": 1776985241,
-        "narHash": "sha256-gB3QUxA4OZ8Zg5YGbAHmknSnAHrhEGxzz/DXRiKiK50=",
+        "lastModified": 1777032505,
+        "narHash": "sha256-aYOp90lIc22D+Ts2cR9T4ZbhP3JQUoj2pISUp6M5JaA=",
         "owner": "badlogic",
         "repo": "pi-mono",
-        "rev": "612be54c287a339ef092e24a7b8daa694dd82a07",
+        "rev": "6b443c685ffb8c2b74912155ee143292b762cd7d",
         "type": "github"
       },
       "original": {
         "owner": "badlogic",
-        "ref": "v0.70.0",
+        "ref": "v0.70.1",
         "repo": "pi-mono",
         "type": "github"
       }
