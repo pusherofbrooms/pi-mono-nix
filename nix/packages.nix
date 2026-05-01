@@ -24,14 +24,9 @@ in
 
   pi = mkCliOutput "pi" "pi";
   "pi-ai" = mkCliOutput "pi-ai" "pi-ai";
-  "pi-pods" = mkCliOutput "pi-pods" "pi-pods";
-  "pi-mom" = mkCliOutput "mom" "mom";
-
   "pi-ai-lib" = mkDistOutput "pi-ai-lib" "ai";
   "pi-agent-core" = mkDistOutput "pi-agent-core" "agent";
   "pi-coding-agent" = mkDistOutput "pi-coding-agent" "coding-agent";
   "pi-tui" = mkDistOutput "pi-tui" "tui";
   "pi-web-ui" = mkDistOutput "pi-web-ui" "web-ui";
-  "pi-mom-lib" = mkDistOutput "pi-mom-lib" "mom";
-  "pi-pods-lib" = mkDistOutput "pi-pods-lib" "pods";
 }

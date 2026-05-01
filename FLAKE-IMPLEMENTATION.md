@@ -18,18 +18,18 @@ Upstream source behavior is not changed directly; Nix-specific behavior is appli
 `nix/workspace.nix` builds the monorepo once via `buildNpmPackage` and installs:
 - workspace package `dist` outputs
 - runtime docs/examples needed by `coding-agent`
-- CLI wrappers: `pi`, `pi-ai`, `pi-pods`, `mom`
+- CLI wrappers: `pi`, `pi-ai`
 
 ## 2) Package/app projection from workspace
 
 `nix/packages.nix` exposes:
-- CLI packages (`pi`, `pi-ai`, `pi-pods`, `pi-mom`)
-- library artifact packages (`pi-ai-lib`, `pi-agent-core`, `pi-coding-agent`, `pi-tui`, `pi-web-ui`, `pi-mom-lib`, `pi-pods-lib`)
+- CLI packages (`pi`, `pi-ai`)
+- library artifact packages (`pi-ai-lib`, `pi-agent-core`, `pi-coding-agent`, `pi-tui`, `pi-web-ui`)
 - raw `workspace` package
 
 `flake.nix` exposes:
 - `packages` (default = `pi`)
-- `apps` (`pi`, `pi-ai`, `pi-pods`, `mom`; default = `pi`)
+- `apps` (`pi`, `pi-ai`; default = `pi`)
 - `devShells.default`
 
 ## 3) Deterministic AI build behavior
@@ -55,13 +55,6 @@ Reason: workspace outputs include large native/prebuilt `node_modules` trees whe
 - native build tooling: `pkg-config`, `python3`, `gcc`, `gnumake`
 - Linux-only graphics/native libs: `cairo`, `pango`, `libjpeg`, `giflib`, `librsvg`, `pixman`
 
-## Exposed Output Naming Conventions
-
-- App attr for mom CLI: `mom` (run with `nix run .#mom`)
-- Package attr for mom CLI wrapper: `pi-mom` (build with `nix build .#pi-mom`)
-
-This split is intentional and documented in README.
-
 ## Maintenance Workflow
 
 Recommended commands:
@@ -82,8 +75,7 @@ Locking policy:
 ## Known Caveats / Field Notes
 
 1. Running many Nix commands concurrently can produce sqlite lock noise (`... database is busy`) on some systems.
-2. `mom --help` may print help text but return non-zero; prefer output-based smoke checks.
-3. Non-Nix runtime extension installs are less reproducible and may fail for native-module extensions.
+2. Non-Nix runtime extension installs are less reproducible and may fail for native-module extensions.
 
 ## Open Follow-ups (Optional)
 

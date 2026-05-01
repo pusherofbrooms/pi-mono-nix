@@ -4,7 +4,7 @@ Nix flake packaging for [`badlogic/pi-mono`](https://github.com/badlogic/pi-mono
 
 This repository is an **external packaging flake** for upstream `pi-mono`. It provides:
 - a reproducible workspace build for the upstream monorepo
-- runnable CLI apps (`pi`, `pi-ai`, `pi-pods`, `mom`)
+- runnable CLI apps (`pi`, `pi-ai`)
 - package outputs for CLI and library artifacts
 - a contributor `devShell`
 
@@ -27,8 +27,6 @@ Built with `flake-utils.lib.eachDefaultSystem`:
 # run CLIs directly from GitHub
 nix run github:pusherofbrooms/pi-mono-nix#pi -- --help
 nix run github:pusherofbrooms/pi-mono-nix#pi-ai -- --help
-nix run github:pusherofbrooms/pi-mono-nix#pi-pods -- --help
-nix run github:pusherofbrooms/pi-mono-nix#mom -- --help
 ```
 
 Inspect exported outputs without cloning:
@@ -54,8 +52,6 @@ nix build .#pi
 # run CLIs
 nix run .#pi -- --help
 nix run .#pi-ai -- --help
-nix run .#pi-pods -- --help
-nix run .#mom -- --help
 ```
 
 ## Container Images (Linux)
@@ -65,8 +61,6 @@ Build OCI/Docker image tarballs for CLI targets:
 ```bash
 nix build .#pi-container
 nix build .#pi-ai-container
-nix build .#pi-pods-container
-nix build .#mom-container
 ```
 
 Load one into Docker/Podman, then run:
@@ -118,7 +112,7 @@ Open an interactive shell in the image:
 docker run --rm -it --entrypoint bash pi:latest
 ```
 
-Other targets work the same way (image tags: `pi-ai:latest`, `pi-pods:latest`, `mom:latest`).
+Other targets work the same way (image tag: `pi-ai:latest`).
 
 ## Validation Commands
 
@@ -178,32 +172,22 @@ Add `pi-mono-nix` as an input, then reference its packages/apps for each target 
 - `default` (`pi`)
 - `pi`
 - `pi-ai`
-- `pi-pods`
-- `pi-mom` (package name is `pi-mom`, binary is `mom`)
 - `workspace`
 - `pi-ai-lib`
 - `pi-agent-core`
 - `pi-coding-agent`
 - `pi-tui`
 - `pi-web-ui`
-- `pi-mom-lib`
-- `pi-pods-lib`
 - `pi-container` (Linux only; OCI/Docker image tarball)
 - `pi-ai-container` (Linux only; OCI/Docker image tarball)
-- `pi-pods-container` (Linux only; OCI/Docker image tarball)
-- `mom-container` (Linux only; OCI/Docker image tarball)
 
 ### `apps`
 - `default` (`pi`)
 - `pi`
 - `pi-ai`
-- `pi-pods`
-- `mom`
 
 ### `devShells`
 - `default`
-
-> Naming note: `mom` is exposed as an **app** (`nix run .#mom`) and `pi-mom` is exposed as a **package** (`nix build .#pi-mom`).
 
 ## pi Extensions (non-Nix-packaged)
 

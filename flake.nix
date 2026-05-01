@@ -5,7 +5,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     pi-mono = {
-      url = "github:badlogic/pi-mono?ref=v0.70.6";
+      url = "github:badlogic/pi-mono?ref=v0.71.1";
       flake = false;
     };
   };
@@ -57,8 +57,6 @@
           containerSet = pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
             "pi-container" = mkContainerImage "pi" packageSet.pi "pi";
             "pi-ai-container" = mkContainerImage "pi-ai" packageSet."pi-ai" "pi-ai";
-            "pi-pods-container" = mkContainerImage "pi-pods" packageSet."pi-pods" "pi-pods";
-            "mom-container" = mkContainerImage "mom" packageSet."pi-mom" "mom";
           };
           devShell = import ./nix/devshell.nix {
             inherit (pkgs)
@@ -97,8 +95,6 @@
             default = mkApp packageSet.pi "pi coding agent CLI";
             pi = mkApp packageSet.pi "pi coding agent CLI";
             "pi-ai" = mkApp packageSet."pi-ai" "pi AI provider auth helper CLI";
-            "pi-pods" = mkApp packageSet."pi-pods" "pi GPU pod management CLI";
-            mom = mkApp packageSet."pi-mom" "mom multi-agent orchestrator CLI";
           };
 
           devShells = {

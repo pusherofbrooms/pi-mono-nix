@@ -29,7 +29,7 @@ buildNpmPackage {
   # Set with fake hash first; nix will print the correct hash on first build.
   # Replace this with that value before upstreaming.
   # npmDepsHash = lib.fakeHash;
-  npmDepsHash = "sha256-pEVIqp9rbuHFE6eqSmADmIXWAPey1VbD7qmOJwksz1o=";
+  npmDepsHash = "sha256-irLlmq/to4x0GnNhSFVmfiuaiPx3B9l+PhlVeJSfhpU=";
 
   # Build all workspace packages in repo-defined order.
   npmBuildScript = "build";
@@ -65,7 +65,7 @@ buildNpmPackage {
     cp package.json package-lock.json "$root/"
     cp -R node_modules "$root/"
 
-    for pkg in ai agent coding-agent mom pods tui web-ui; do
+    for pkg in ai agent coding-agent tui web-ui; do
       mkdir -p "$root/packages/$pkg"
       cp packages/$pkg/package.json "$root/packages/$pkg/"
       cp -R packages/$pkg/dist "$root/packages/$pkg/"
@@ -92,8 +92,6 @@ buildNpmPackage {
     mkdir -p "$out/bin"
     makeWrapper ${nodejs_22}/bin/node "$out/bin/pi" --add-flags "$root/packages/coding-agent/dist/cli.js"
     makeWrapper ${nodejs_22}/bin/node "$out/bin/pi-ai" --add-flags "$root/packages/ai/dist/cli.js"
-    makeWrapper ${nodejs_22}/bin/node "$out/bin/pi-pods" --add-flags "$root/packages/pods/dist/cli.js"
-    makeWrapper ${nodejs_22}/bin/node "$out/bin/mom" --add-flags "$root/packages/mom/dist/main.js"
 
     runHook postInstall
   '';
