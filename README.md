@@ -1,8 +1,8 @@
 # pi-mono-nix
 
-Nix flake packaging for [`badlogic/pi-mono`](https://github.com/badlogic/pi-mono), which currently does not ship its own flake.
+Nix flake packaging for [`earendil-works/pi`](https://github.com/earendil-works/pi), which currently does not ship its own flake.
 
-This repository is an **external packaging flake** for upstream `pi-mono`. It provides:
+This repository is an **external packaging flake** for upstream `pi`. It provides:
 - a reproducible workspace build for the upstream monorepo
 - runnable CLI apps (`pi`, `pi-ai`)
 - package outputs for CLI and library artifacts
@@ -210,7 +210,7 @@ Caveats:
 
 ## Design Notes
 
-- Source input is pinned to `github:badlogic/pi-mono` as a non-flake input.
+- Source input is pinned to `github:earendil-works/pi` as a non-flake input.
 - The workspace is built once via `buildNpmPackage`; package outputs are symlinked from that build.
 - Nix build behavior updates the `packages/ai` workspace build script in-derivation to avoid live model metadata fetches, keeping builds deterministic.
 - Fixup is disabled for this workspace build (`dontFixup = true`) due to large native/prebuilt dependency trees in `node_modules`.
@@ -224,7 +224,7 @@ scripts/update-release.sh
 ```
 
 This script:
-- updates `flake.nix` to the latest `badlogic/pi-mono` release tag
+- updates `flake.nix` to the latest `earendil-works/pi` release tag
 - runs `nix flake lock --update-input pi-mono`
 - forces `npmDepsHash = lib.fakeHash`, captures the reported real hash, writes it back, and rebuilds `.#pi`
 - runs `nix run .#pi -- --help`
