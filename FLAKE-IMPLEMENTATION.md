@@ -4,7 +4,7 @@ This document reflects the **current state** of this repository (not a future pl
 
 ## Scope and Intent
 
-This repository packages upstream [`badlogic/pi-mono`](https://github.com/badlogic/pi-mono) as an external Nix flake, with focus on:
+This repository packages upstream [`earendil-works/pi`](https://github.com/earendil-works/pi) as an external Nix flake, with focus on:
 - deterministic workspace builds
 - discoverable package/app outputs
 - contributor ergonomics (`devShell`)

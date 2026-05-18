@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This repository packages `badlogic/pi-mono` as a Nix flake. Agent work here should primarily maintain flake correctness, reproducibility, and developer ergonomics.
+This repository packages `earendil-works/pi` as a Nix flake. Agent work here should primarily maintain flake correctness, reproducibility, and developer ergonomics.
 
 ## Scope
 

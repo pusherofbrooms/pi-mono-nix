@@ -5,7 +5,7 @@ usage() {
   cat <<'EOF'
 Usage: scripts/update-release.sh [--tag vX.Y.Z] [--no-commit] [--allow-dirty]
 
-Updates this flake to the latest badlogic/pi-mono release (or a provided tag):
+Updates this flake to the latest earendil-works/pi release (or a provided tag):
 1) updates pi-mono ref in flake.nix
 2) updates flake.lock for input pi-mono
 3) sets npmDepsHash = lib.fakeHash and builds .#pi to capture the real hash
@@ -71,6 +71,10 @@ rewrite_npm_deps_hash() {
   mv "$tmp" nix/workspace.nix
 }
 
+UPSTREAM_OWNER="earendil-works"
+UPSTREAM_REPO="pi"
+UPSTREAM_FLAKE_URL="github:${UPSTREAM_OWNER}/${UPSTREAM_REPO}"
+
 TAG=""
 NO_COMMIT=0
 ALLOW_DIRTY=0
@@ -119,7 +123,7 @@ fi
 if [[ -z "$TAG" ]]; then
   require_cmd curl
   TAG="$({
-    curl -fsSL https://api.github.com/repos/badlogic/pi-mono/releases/latest \
+    curl -fsSL "https://api.github.com/repos/${UPSTREAM_OWNER}/${UPSTREAM_REPO}/releases/latest" \
       | grep -Eo '"tag_name"[[:space:]]*:[[:space:]]*"[^"]+"' \
       | head -n1 \
       | sed -E 's/.*"([^"]+)"/\1/'
@@ -137,14 +141,26 @@ if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
 fi
 
 echo "==> Updating flake.nix pi-mono ref to $TAG"
-OLD_REF_LINE="$(grep -E 'github:badlogic/pi-mono\?ref=' flake.nix || true)"
+OLD_REF_LINE="$(grep -F "${UPSTREAM_FLAKE_URL}?ref=" flake.nix || true)"
 TMP_FLAKE="$(mktemp_in_tmpdir "pi-mono-nix-flake")"
-awk -v tag="$TAG" '{
-  gsub(/github:badlogic\/pi-mono\?ref=[^"]+/, "github:badlogic/pi-mono?ref=" tag)
-  print
-}' flake.nix > "$TMP_FLAKE"
+awk -v flake_url="$UPSTREAM_FLAKE_URL" -v tag="$TAG" '
+  BEGIN { replaced=0 }
+  {
+    pattern = flake_url "\\?ref=[^\"]+"
+    replacement = flake_url "?ref=" tag
+    replaced += gsub(pattern, replacement)
+    print
+  }
+  END {
+    if (!replaced) exit 1
+  }
+' flake.nix > "$TMP_FLAKE" || {
+  rm -f "$TMP_FLAKE"
+  echo "error: could not find ${UPSTREAM_FLAKE_URL}?ref=... in flake.nix" >&2
+  exit 1
+}
 mv "$TMP_FLAKE" flake.nix
-NEW_REF_LINE="$(grep -E 'github:badlogic/pi-mono\?ref=' flake.nix || true)"
+NEW_REF_LINE="$(grep -F "${UPSTREAM_FLAKE_URL}?ref=" flake.nix || true)"
 if [[ "$OLD_REF_LINE" == "$NEW_REF_LINE" ]]; then
   echo "note: flake.nix ref was already $TAG"
 fi
