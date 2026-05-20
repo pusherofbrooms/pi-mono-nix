@@ -24,7 +24,7 @@ Upstream source behavior is not changed directly; Nix-specific behavior is appli
 
 `nix/packages.nix` exposes:
 - CLI packages (`pi`, `pi-ai`)
-- library artifact packages (`pi-ai-lib`, `pi-agent-core`, `pi-coding-agent`, `pi-tui`, `pi-web-ui`)
+- library artifact packages (`pi-ai-lib`, `pi-agent-core`, `pi-coding-agent`, `pi-tui`)
 - raw `workspace` package
 
 `flake.nix` exposes:

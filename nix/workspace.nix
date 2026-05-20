@@ -29,7 +29,7 @@ buildNpmPackage {
   # Set with fake hash first; nix will print the correct hash on first build.
   # Replace this with that value before upstreaming.
   # npmDepsHash = lib.fakeHash;
-  npmDepsHash = "sha256-jb+wx80mFkdkPA6P6SOBsBu2WPxkIT5G7FJH4ZkeasY=";
+  npmDepsHash = "sha256-CjEkRJjX9PspxqNNZ90aWYzxneFIoYpjodpkMJNeAUE=";
   npmDepsFetcherVersion = 2;
 
   # Build all workspace packages in repo-defined order.
@@ -66,7 +66,7 @@ buildNpmPackage {
     cp package.json package-lock.json "$root/"
     cp -R node_modules "$root/"
 
-    for pkg in ai agent coding-agent tui web-ui; do
+    for pkg in ai agent coding-agent tui; do
       mkdir -p "$root/packages/$pkg"
       cp packages/$pkg/package.json "$root/packages/$pkg/"
       cp -R packages/$pkg/dist "$root/packages/$pkg/"

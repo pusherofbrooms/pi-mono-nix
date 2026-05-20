@@ -177,7 +177,6 @@ Add `pi-mono-nix` as an input, then reference its packages/apps for each target 
 - `pi-agent-core`
 - `pi-coding-agent`
 - `pi-tui`
-- `pi-web-ui`
 - `pi-container` (Linux only; OCI/Docker image tarball)
 - `pi-ai-container` (Linux only; OCI/Docker image tarball)
 

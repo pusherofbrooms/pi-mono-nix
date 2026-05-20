@@ -28,5 +28,4 @@ in
   "pi-agent-core" = mkDistOutput "pi-agent-core" "agent";
   "pi-coding-agent" = mkDistOutput "pi-coding-agent" "coding-agent";
   "pi-tui" = mkDistOutput "pi-tui" "tui";
-  "pi-web-ui" = mkDistOutput "pi-web-ui" "web-ui";
 }
