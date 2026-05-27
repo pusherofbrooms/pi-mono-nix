@@ -37,16 +37,16 @@
     "pi-mono": {
       "flake": false,
       "locked": {
-        "lastModified": 1779530872,
-        "narHash": "sha256-RNQ4ospdohOA8hyegCMziJHHbmFGdk/QtkjzJmS/PZc=",
+        "lastModified": 1779912201,
+        "narHash": "sha256-mlnkSmNJbRfDa0DyGvl0hSV1r2aPszW1G6lz5fAqQeY=",
         "owner": "earendil-works",
         "repo": "pi",
-        "rev": "89ba72c35dcbcdc0144f4e57a0b76568c50c2cbb",
+        "rev": "706f8720f8cfe75f562b4e488681486cb70bbe9b",
         "type": "github"
       },
       "original": {
         "owner": "earendil-works",
-        "ref": "v0.75.5",
+        "ref": "v0.76.0",
         "repo": "pi",
         "type": "github"
       }
