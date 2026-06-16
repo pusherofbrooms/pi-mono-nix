@@ -29,7 +29,7 @@ buildNpmPackage {
   # Set with fake hash first; nix will print the correct hash on first build.
   # Replace this with that value before upstreaming.
   # npmDepsHash = lib.fakeHash;
-  npmDepsHash = "sha256-ht9G9QGtx/c90oSQ0bmmChS4S73JFZBNqoKOVQqvZpQ=";
+  npmDepsHash = "sha256-hyr417eI7qtHcLhDweQKhl0KG4ukeWypgUEzqESTuaI=";
   npmDepsFetcherVersion = 2;
 
   # Build all workspace packages in repo-defined order.
