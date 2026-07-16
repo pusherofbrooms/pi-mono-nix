@@ -5,7 +5,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     pi-mono = {
-      url = "github:earendil-works/pi?ref=v0.80.7";
+      url = "github:earendil-works/pi?ref=v0.80.8";
       flake = false;
     };
   };
