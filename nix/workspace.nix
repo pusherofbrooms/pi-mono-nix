@@ -15,6 +15,7 @@
   librsvg,
   pixman,
   src,
+  modelDataSrc,
 }:
 let
   source = lib.cleanSource src;
@@ -29,7 +30,7 @@ buildNpmPackage {
   # Set with fake hash first; nix will print the correct hash on first build.
   # Replace this with that value before upstreaming.
   # npmDepsHash = lib.fakeHash;
-  npmDepsHash = "sha256-Ro2ovgqH6EpFb20M5DvcP6KIxXZPHcjeEdo1Sh4JbDM=";
+  npmDepsHash = "sha256-8TrTDYpgobFRVXalfBoLkKV/DZlzUMYoyWgYXW9tIlo=";
   npmDepsFetcherVersion = 2;
 
   # Build all workspace packages in repo-defined order.
@@ -37,7 +38,11 @@ buildNpmPackage {
 
   # Keep repository sources untouched: adjust build behavior only inside derivation.
   preBuild = ''
-    npm pkg set scripts.build="tsgo -p tsconfig.build.json" --workspace=packages/ai
+    # Upstream keeps generated model values out of Git. Hydrate them from the
+    # matching, lock-pinned pi-ai npm release before running the offline build.
+    mkdir -p packages/ai/src/providers/data
+    cp -R ${modelDataSrc}/dist/providers/data/. packages/ai/src/providers/data/
+    npm pkg set scripts.build="npm run build:offline" --workspace=packages/ai
   '';
 
   nativeBuildInputs = [

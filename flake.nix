@@ -5,14 +5,25 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     pi-mono = {
-      url = "github:earendil-works/pi?ref=v0.80.10";
+      url = "github:earendil-works/pi?ref=v0.81.1";
+      flake = false;
+    };
+    # Generated model values are gitignored upstream but included in pi-ai's
+    # published package. Pin that package as a separate, immutable build input.
+    pi-ai-release = {
+      url = "https://registry.npmjs.org/@earendil-works/pi-ai/-/pi-ai-0.81.1.tgz";
       flake = false;
     };
   };
 
   outputs =
-    { self, nixpkgs, flake-utils, pi-mono }@inputs:
-    flake-utils.lib.eachDefaultSystem
+    { self, nixpkgs, flake-utils, pi-mono, pi-ai-release }@inputs:
+    flake-utils.lib.eachSystem
+      [
+        "aarch64-linux"
+        "x86_64-linux"
+        "aarch64-darwin"
+      ]
       (
         system:
         let
@@ -20,6 +31,7 @@
           piSrc = inputs."pi-mono";
           workspace = pkgs.callPackage ./nix/workspace.nix {
             src = piSrc;
+            modelDataSrc = inputs."pi-ai-release";
           };
           packageSet = import ./nix/packages.nix {
             inherit workspace;

@@ -6,8 +6,8 @@ usage() {
 Usage: scripts/update-release.sh [--tag vX.Y.Z] [--no-commit] [--allow-dirty]
 
 Updates this flake to the latest earendil-works/pi release (or a provided tag):
-1) updates pi-mono ref in flake.nix
-2) updates flake.lock for input pi-mono
+1) updates pi-mono and pi-ai release sources in flake.nix
+2) updates flake.lock for inputs pi-mono and pi-ai-release
 3) sets npmDepsHash = lib.fakeHash and builds .#pi to capture the real hash
 4) writes the real npmDepsHash to nix/workspace.nix and rebuilds
 5) runs .#pi -- --help
@@ -74,6 +74,7 @@ rewrite_npm_deps_hash() {
 UPSTREAM_OWNER="earendil-works"
 UPSTREAM_REPO="pi"
 UPSTREAM_FLAKE_URL="github:${UPSTREAM_OWNER}/${UPSTREAM_REPO}"
+PI_AI_TARBALL_BASE="https://registry.npmjs.org/@earendil-works/pi-ai/-/pi-ai-"
 
 TAG=""
 NO_COMMIT=0
@@ -143,20 +144,26 @@ fi
 echo "==> Updating flake.nix pi-mono ref to $TAG"
 OLD_REF_LINE="$(grep -F "${UPSTREAM_FLAKE_URL}?ref=" flake.nix || true)"
 TMP_FLAKE="$(mktemp_in_tmpdir "pi-mono-nix-flake")"
-awk -v flake_url="$UPSTREAM_FLAKE_URL" -v tag="$TAG" '
-  BEGIN { replaced=0 }
+awk -v flake_url="$UPSTREAM_FLAKE_URL" -v npm_base="$PI_AI_TARBALL_BASE" -v tag="$TAG" '
+  BEGIN { source_replaced=0; data_replaced=0 }
   {
-    pattern = flake_url "\\?ref=[^\"]+"
-    replacement = flake_url "?ref=" tag
-    replaced += gsub(pattern, replacement)
+    source_pattern = flake_url "\\?ref=[^\"]+"
+    source_replacement = flake_url "?ref=" tag
+    source_replaced += gsub(source_pattern, source_replacement)
+
+    version = tag
+    sub(/^v/, "", version)
+    data_pattern = npm_base "[^\"]+\\.tgz"
+    data_replacement = npm_base version ".tgz"
+    data_replaced += gsub(data_pattern, data_replacement)
     print
   }
   END {
-    if (!replaced) exit 1
+    if (!source_replaced || !data_replaced) exit 1
   }
 ' flake.nix > "$TMP_FLAKE" || {
   rm -f "$TMP_FLAKE"
-  echo "error: could not find ${UPSTREAM_FLAKE_URL}?ref=... in flake.nix" >&2
+  echo "error: could not find pi-mono and pi-ai release sources in flake.nix" >&2
   exit 1
 }
 mv "$TMP_FLAKE" flake.nix
@@ -165,8 +172,8 @@ if [[ "$OLD_REF_LINE" == "$NEW_REF_LINE" ]]; then
   echo "note: flake.nix ref was already $TAG"
 fi
 
-echo "==> Updating lock for input pi-mono"
-nix flake update pi-mono
+echo "==> Updating locks for inputs pi-mono and pi-ai-release"
+nix flake update pi-mono pi-ai-release
 
 echo "==> Forcing npmDepsHash refresh via lib.fakeHash"
 rewrite_npm_deps_hash fake

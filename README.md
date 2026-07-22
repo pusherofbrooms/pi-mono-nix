@@ -15,11 +15,12 @@ This repository is an **external packaging flake** for upstream `pi`. It provide
 
 ## Supported Systems
 
-Built with `flake-utils.lib.eachDefaultSystem`:
+Built for:
 - `aarch64-linux`
 - `x86_64-linux`
 - `aarch64-darwin`
-- `x86_64-darwin`
+
+`x86_64-darwin` is not exposed because current nixpkgs unstable no longer supports it.
 
 ## Quick Start (Remote)
 
@@ -210,8 +211,9 @@ Caveats:
 ## Design Notes
 
 - Source input is pinned to `github:earendil-works/pi` as a non-flake input.
+- Generated model catalog values are sourced from the matching, lock-pinned `pi-ai` npm release because upstream excludes them from Git.
 - The workspace is built once via `buildNpmPackage`; package outputs are symlinked from that build.
-- Nix build behavior updates the `packages/ai` workspace build script in-derivation to avoid live model metadata fetches, keeping builds deterministic.
+- Nix hydrates the model values and selects the upstream offline `packages/ai` build in-derivation, avoiding live metadata fetches.
 - Fixup is disabled for this workspace build (`dontFixup = true`) due to large native/prebuilt dependency trees in `node_modules`.
 
 ## Updating Inputs
@@ -223,8 +225,8 @@ scripts/update-release.sh
 ```
 
 This script:
-- updates `flake.nix` to the latest `earendil-works/pi` release tag
-- runs `nix flake lock --update-input pi-mono`
+- updates `flake.nix` to the latest `earendil-works/pi` release tag and matching `pi-ai` npm tarball
+- updates the `pi-mono` and `pi-ai-release` locks
 - forces `npmDepsHash = lib.fakeHash`, captures the reported real hash, writes it back, and rebuilds `.#pi`
 - runs `nix run .#pi -- --help`
 - creates a commit (`chore: update pi-mono to <tag>`)
@@ -240,7 +242,7 @@ scripts/update-release.sh --allow-dirty
 Manual fallback:
 
 ```bash
-nix flake lock --update-input pi-mono
+nix flake update pi-mono pi-ai-release
 nix build .#pi
 ```
 
