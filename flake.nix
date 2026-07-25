@@ -5,13 +5,13 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     pi-mono = {
-      url = "github:earendil-works/pi?ref=v0.82.0";
+      url = "github:earendil-works/pi?ref=v0.82.1";
       flake = false;
     };
     # Generated model values are gitignored upstream but included in pi-ai's
     # published package. Pin that package as a separate, immutable build input.
     pi-ai-release = {
-      url = "https://registry.npmjs.org/@earendil-works/pi-ai/-/pi-ai-0.82.0.tgz";
+      url = "https://registry.npmjs.org/@earendil-works/pi-ai/-/pi-ai-0.82.1.tgz";
       flake = false;
     };
   };
