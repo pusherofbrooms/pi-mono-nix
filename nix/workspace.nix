@@ -30,7 +30,7 @@ buildNpmPackage {
   # Set with fake hash first; nix will print the correct hash on first build.
   # Replace this with that value before upstreaming.
   # npmDepsHash = lib.fakeHash;
-  npmDepsHash = "sha256-/xBp9Tn3jbPMSzrBVzH0Fb5uBNiLC8JlT/q09Zf08lM=";
+  npmDepsHash = "sha256-Jg41FctRJmtBh3vlsqoUVBrkuazyudcgeH16n5qNDe0=";
   npmDepsFetcherVersion = 2;
 
   # Build all workspace packages in repo-defined order.
@@ -74,7 +74,7 @@ buildNpmPackage {
     # Include every workspace package reachable from the CLI at runtime. npm
     # installs these as symlinks into packages/, so omitting one leaves a
     # dangling node_modules entry.
-    for pkg in ai agent client coding-agent protocol telemetry tui; do
+    for pkg in ai agent chord client coding-agent protocol server telemetry tui; do
       mkdir -p "$root/packages/$pkg"
       cp packages/$pkg/package.json "$root/packages/$pkg/"
       cp -R packages/$pkg/dist "$root/packages/$pkg/"
