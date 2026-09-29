@@ -213,6 +213,7 @@ Caveats:
 - Source input is pinned to `github:earendil-works/pi` as a non-flake input.
 - Generated model catalog values are sourced from the matching, lock-pinned `pi-ai` npm release because upstream excludes them from Git.
 - The workspace is built once via `buildNpmPackage`; package outputs are symlinked from that build.
+- The build smoke-tests the installed CLI with `pi --help` to catch missing runtime workspace dependencies.
 - Nix hydrates the model values and selects the upstream offline `packages/ai` build in-derivation, avoiding live metadata fetches.
 - Fixup is disabled for this workspace build (`dontFixup = true`) due to large native/prebuilt dependency trees in `node_modules`.
 

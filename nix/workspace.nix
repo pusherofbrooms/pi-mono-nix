@@ -30,7 +30,7 @@ buildNpmPackage {
   # Set with fake hash first; nix will print the correct hash on first build.
   # Replace this with that value before upstreaming.
   # npmDepsHash = lib.fakeHash;
-  npmDepsHash = "sha256-2LdwgFkOEkRZ7MqfWmBSj7cy9WUWHklEOED9c4BwmHE=";
+  npmDepsHash = "sha256-fLoNMMcQG6Pya/CjJ9cOJth7Hu9rv9TVANQ8m+Z9Vgw=";
   npmDepsFetcherVersion = 2;
 
   # Build all workspace packages in repo-defined order.
@@ -74,7 +74,7 @@ buildNpmPackage {
     # Include every workspace package reachable from the CLI at runtime. npm
     # installs these as symlinks into packages/, so omitting one leaves a
     # dangling node_modules entry.
-    for pkg in ai agent chord client coding-agent protocol server telemetry tui; do
+    for pkg in ai agent chord client codemode coding-agent mcp protocol server telemetry tui; do
       mkdir -p "$root/packages/$pkg"
       cp packages/$pkg/package.json "$root/packages/$pkg/"
       cp -R packages/$pkg/dist "$root/packages/$pkg/"
@@ -103,6 +103,15 @@ buildNpmPackage {
     makeWrapper ${nodejs_22}/bin/node "$out/bin/pi-ai" --add-flags "$root/packages/ai/dist/cli.js"
 
     runHook postInstall
+  '';
+
+  # Catch missing runtime workspace dependencies during the build, not only
+  # when the release updater launches the installed CLI.
+  doInstallCheck = true;
+  installCheckPhase = ''
+    runHook preInstallCheck
+    HOME="$TMPDIR/pi-install-check" "$out/bin/pi" --help > /dev/null
+    runHook postInstallCheck
   '';
 
   # This workspace contains many prebuilt/native Node artifacts;
