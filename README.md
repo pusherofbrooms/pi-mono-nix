@@ -1,3 +1,6 @@
+# DEPRECATION
+Upstream now includes a flake. Because of this, I won't be keeping this flake up to date.
+
 # pi-mono-nix
 
 Nix flake packaging for [`earendil-works/pi`](https://github.com/earendil-works/pi), which currently does not ship its own flake.
